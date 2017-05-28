@@ -2,14 +2,14 @@ import torch
 from torch.autograd import Variable
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
 
 
 class Net(nn.Module):
 
     def __init__(self):
-        super(Net, self).__init__()
+        super(Net, self).__init__()#init error occurs without this
         # 1 input image channel, 6 output channels, 5x5 square convolution
-        super(Net,self).__init__() #init error occurs without this
         # kernel
         self.conv1 = nn.Conv2d(1, 6, 5)
         self.conv2 = nn.Conv2d(6, 16, 5)
@@ -37,5 +37,35 @@ class Net(nn.Module):
         return num_features
 
 
+#init a net
 net = Net()
+net = net.cuda()
 print(net)
+
+# input a picture of 32*32(why nSamples*nChannels*Height*Width)
+input = Variable(torch.randn(1, 1, 32, 32))
+input = input.cuda()
+
+# torch.cuda.is_available() can test the cuda state
+# build the target
+temp = torch.zeros(10)
+temp[3] = 1
+target = Variable(temp.cuda())  # a dummy target, for example
+criterion = nn.MSELoss()
+
+# update weights(Stochastic Gradient Descent for example)
+# create your optimizer
+optimizer = optim.SGD(net.parameters(), lr=0.01)
+# in your training loop:
+for loop in range(1,10000):
+    optimizer.zero_grad()   # zero the gradient buffers
+    output = net(input)
+    loss = criterion(output, target)
+    loss.backward()
+    optimizer.step()    # Does the update
+    print("Loop Num: %d, loss = %f" % (loop,loss.data[0]))
+    if loss.data[0] < 1e-4:
+        break
+# your final loss is a cuda tensor
+print(loss)
+
