@@ -6,7 +6,7 @@
 + Pytorch是按行映射的，y=Ax+b中将x的行向量映射为y的行向量
 
 ## 用到的一些函数
-+ (按行)拼接 **torch.cat()**
++ (按行)拼接 **torch.cat()**, torch.cat([], axis)
 + reshape tensor **.view()**
 + 激活函数tanh、sigma、ReLU
 + 输出分类 **.softmax(),._log_softmax()**
