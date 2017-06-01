@@ -9,7 +9,7 @@
 + (按行)拼接 **torch.cat()**, torch.cat([], axis)
 + reshape tensor **.view()**
 + 激活函数tanh、sigma、ReLU
-+ 输出分类 **.softmax(),._log_softmax()**
++ 输出分类 **.softmax(),.log_softmax()**
 
 ## 要看的Tutorial
 路径：/home/xky/mygit/PR_Image_Captioning_CH/Tutorial
