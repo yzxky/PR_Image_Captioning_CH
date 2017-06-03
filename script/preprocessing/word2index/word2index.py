@@ -41,8 +41,8 @@ class Lang(object):
                 self.addSentence(line)
 
 
-lang = Lang("train_cut.txt")
-lang.all2index()
+#lang = Lang("train_cut.txt")
+#lang.all2index()
 
 # with codecs.open("train_cut.txt", encoding="utf-8") as f:
 #     for line in f:
@@ -50,7 +50,7 @@ lang.all2index()
 #             continue
 #         lang.addSentence(line)
 
-print lang.index2word[34]
-print lang.word2index["一个"]
-print lang.word2count["一个"]
-print lang.n_words
+#print lang.index2word[34]
+#print lang.word2index["一个"]
+#print lang.word2count["一个"]
+#print lang.n_words
