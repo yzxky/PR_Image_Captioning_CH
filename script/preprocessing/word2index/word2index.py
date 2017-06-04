@@ -1,10 +1,9 @@
 # -*- encoding=utf-8 -*-
 from __future__ import unicode_literals
 import codecs
-import re
 
-SOS_token = 0
-EOS_token = 1
+SOS_token = 1
+EOS_token = 2
 
 
 class Lang(object):
@@ -16,11 +15,6 @@ class Lang(object):
         self.n_words = 4  # Count SOS and EOS
 
     def addSentence(self, sentence):
-        # delete punctuation, replace uppercase letters with lowercase letters
-        # sentence = sentence.decode("utf-8")
-        sentence = re.sub("[\.\!\/_,$%^*(+\"\']+|[+——！，。？、~@#￥%……&*（）]+",\
-                          "", sentence)
-        sentence = sentence.lower()
         for word in sentence.split(' '):
             self.addWord(word)
 
@@ -41,16 +35,20 @@ class Lang(object):
                 self.addSentence(line)
 
 
-#lang = Lang("train_cut.txt")
-#lang.all2index()
+lang = Lang("train_cut_process.txt")
+lang.all2index()
 
-# with codecs.open("train_cut.txt", encoding="utf-8") as f:
-#     for line in f:
-#         if line.isdigit():
-#             continue
-#         lang.addSentence(line)
+print lang.index2word[34]
+print lang.word2index["一个"]
+print lang.word2count["一个"]
+print lang.n_words
 
-#print lang.index2word[34]
-#print lang.word2index["一个"]
-#print lang.word2count["一个"]
-#print lang.n_words
+# transform sentence to list
+def sen2list(sentence):
+    lst = [1]
+    for word in sentence.split(' '):
+        lst.append(lang.word2index[word])
+    # lst.append(2)
+    return lst
+
+
