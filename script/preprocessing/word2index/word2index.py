@@ -1,4 +1,4 @@
-# -*- encoding=utf-8 -*-
+# -*- coding=utf-8 -*-
 from __future__ import unicode_literals
 import codecs
 
@@ -30,25 +30,29 @@ class Lang(object):
     def all2index(self):
         with codecs.open(self.file_name, encoding="utf-8") as f:
             for line in f:
+                line = line.strip()
+                if line[0] == u"\ufeff":
+                    line = line[1:]
                 if line.isdigit():
                     continue
                 self.addSentence(line)
 
-
-lang = Lang("train_cut_process.txt")
-lang.all2index()
-
-print lang.index2word[34]
-print lang.word2index["一个"]
-print lang.word2count["一个"]
-print lang.n_words
-
 # transform sentence to list
-def sen2list(sentence):
-    lst = [1]
-    for word in sentence.split(' '):
-        lst.append(lang.word2index[word])
-    # lst.append(2)
-    return lst
-
-
+def txt2list(file_name):
+    lang = Lang(file_name)
+    lang.all2index()
+    idx_lst = []
+    with codecs.open(file_name, encoding="utf-8") as f:
+        idx = 1
+        for line in f:
+            line = line.strip()
+            if line[0] == u"\ufeff":
+                line = line[1:]
+            if line.isdigit():
+                idx = int(line)
+                continue
+            lst = [1]
+            for word in line.split(' '):
+                lst.append(lang.word2index[word])
+            idx_lst.append((idx, lst))
+    return idx_lst
