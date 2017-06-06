@@ -38,21 +38,33 @@ class Lang(object):
                 self.addSentence(line)
 
 # transform sentence to list
-def txt2list(file_name):
-    lang = Lang(file_name)
-    lang.all2index()
-    idx_lst = []
-    with codecs.open(file_name, encoding="utf-8") as f:
-        idx = 1
-        for line in f:
-            line = line.strip()
-            if line[0] == u"\ufeff":
-                line = line[1:]
-            if line.isdigit():
-                idx = int(line)
-                continue
-            lst = [1]
-            for word in line.split(' '):
-                lst.append(lang.word2index[word])
-            idx_lst.append((idx, lst))
-    return idx_lst
+def txt2list(file_name, max_length = 0):
+    try:
+        max_length = int(max_length)
+        lang = Lang(file_name)
+        lang.all2index()
+        idx_lst = []
+        with codecs.open(file_name, encoding="utf-8") as f:
+            idx = 1
+            for line in f:
+                line = line.strip()
+                if line[0] == u"\ufeff":
+                    line = line[1:]
+                if line.isdigit():
+                    idx = int(line)
+                    continue
+                lst = [1]
+                for word in line.split(' '):
+                    lst.append(lang.word2index[word])
+                if max_length > 0:
+                    if max_length <= len(lst):
+                        del lst[max_length:]
+                    else:
+                        lst.extend([0]*(max_length-len(lst)))
+                idx_lst.append((idx, lst))
+        return idx_lst
+    except Exception, e:
+        print("The max_length is not an integer")
+        return 0
+
+# idx_list = txt2list("train_cut_process", 'a')
