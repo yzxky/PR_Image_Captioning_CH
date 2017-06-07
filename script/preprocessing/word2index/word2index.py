@@ -37,7 +37,18 @@ class Lang(object):
                     continue
                 self.addSentence(line)
 
-# transform sentence to list
+    def filterWord(self, threshold = 2):
+        for wordIdx in range(4, self.n_words):
+            word = self.index2word[wordIdx]
+            if self.word2count[word] < threshold:
+                self.word2count.pop(word)
+                self.index2word.pop(wordIdx)
+                self.word2index[word] = 3
+                # wordIdx -= 1
+                # self.n_words -= 1
+        self.n_words = len(self.index2word)
+
+
 def txt2list(file_name, max_length = 0):
     try:
         max_length = int(max_length)

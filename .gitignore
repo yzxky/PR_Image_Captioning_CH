@@ -95,3 +95,4 @@ ENV/
 
 *.pyc
 *.txt
+*.pkl

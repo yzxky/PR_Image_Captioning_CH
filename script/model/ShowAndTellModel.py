@@ -6,6 +6,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
+from utils import global_variable
+
+use_cuda = global_variable.use_cuda
 
 class Encoder_ShowAndTellModel(nn.Module):
     def __init__(self, input_size, output_size):
@@ -37,25 +40,27 @@ class Decoder_ShowAndTellModel(nn.Module):
         self.out        = nn.Linear(self.rnn_hidden_size, self.rnn_output_size)
         self.softmax    = nn.LogSoftmax()
 
-        def forward(self, input, hidden):
-            output = self.embedding(input).view(1, 1, -1)
-            for i in range(self.rnn_num_layers):
-                output = F.relu(output)
-                output, hn = self.rnn(output, hn)
-            output = self.softmax(self.out(output[0]))
-            return output, hn
+    def forward(self, input, hidden):
+        output = self.embedding(input).view(1, 1, -1)
+        for i in range(self.rnn_num_layers):
+            output = F.relu(output)
+            output, hidden = self.rnn(output, hidden)
+        output = self.softmax(self.out(output[0]))
+        return output, hidden
 
-        def initHidden(self):
-            result = (Variable(torch.zeros(1, 1, self.rnn_hidden_size)),
-                      Variable(torch.zeros(1, 1, self.rnn_hidden_size)))
-            if use_cuda:
-                return result.cuda()
-            else:
-                return result
+    def initHidden(self):
+        h0 = Variable(torch.zeros(1, 1, self.rnn_hidden_size))
+        c0 = Variable(torch.zeros(1, 1, self.rnn_hidden_size))
+#        result = (Variable(torch.zeros(1, 1, self.rnn_hidden_size)),
+#                  Variable(torch.zeros(1, 1, self.rnn_hidden_size)))
+        if use_cuda:
+            return (h0.cuda(), c0.cuda())
+        else:
+            return (h0, c0)
 
-        def initHidden(self, img_feats):
-            hidden = initHidden()
-            for i in range(self.rnn_num_layers):
-                output = F.relu(img_feats)
-                output, hidden = self.rnn(output, hidden)
-            return hidden
+    def initHiddenFromFeats(self, img_feats):
+        hidden = self.initHidden()
+        for i in range(self.rnn_num_layers):
+            output = F.relu(img_feats).view(1, 1, -1)
+            output, hidden = self.rnn(output, hidden)
+        return hidden

@@ -659,8 +659,8 @@ def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, lear
     print_loss_total = 0  # Reset every print_every
     plot_loss_total = 0  # Reset every plot_every
 
-    encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
-    decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
+    encoder_optimizer = optim.Adam(encoder.parameters(), lr=learning_rate)
+    decoder_optimizer = optim.Adam(decoder.parameters(), lr=learning_rate)
     training_pairs = [variablesFromPair(random.choice(pairs))
                       for i in range(n_iters)]
     criterion = nn.NLLLoss()
@@ -805,7 +805,7 @@ if use_cuda:
     encoder1 = encoder1.cuda()
     attn_decoder1 = attn_decoder1.cuda()
 
-trainIters(encoder1, attn_decoder1, 75000, print_every=5000)
+trainIters(encoder1, attn_decoder1, 75000, print_every=500, learning_rate=0.0001)
 
 ######################################################################
 #

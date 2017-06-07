@@ -2,14 +2,20 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import random
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import optim
 from torch.autograd import Variable
 
-SOS_token = 1
-EOS_token = 2
+from preprocessing.preparingData.prepare_data import variableFromPair
+from preprocessing.preparingData.prepare_data import randomChoosePairFromSet
+from utils import global_variable
+
+use_cuda = global_variable.use_cuda
+
+teacher_forcing_ratio = 0.8
 
 def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion):
     encoder_optimizer.zero_grad()
@@ -18,16 +24,16 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, 
     target_length   = target_variable.size()[0]
 
     encoder_outputs = Variable(torch.zeros(encoder.output_size))
-    encoder_outputs = encoder_outputs.cuda() if use_cude else encoder_outputs
+    encoder_outputs = encoder_outputs.cuda() if use_cuda else encoder_outputs
 
     loss = 0
 
     encoder_outputs = encoder(input_variable)
 
-    decoder_input   = Variable(torch.LongTensor([[SOS_token]]))
+    decoder_input   = Variable(torch.LongTensor([[global_variable.SOS_token]]))
     decoder_input   = decoder_input.cuda() if use_cuda else decoder_input
 
-    decoder_hidden  = decoder.initHidden(encoder_outputs)
+    decoder_hidden  = decoder.initHiddenFromFeats(encoder_outputs)
     
 #    decoder_output, decoder_hidden = decoder(
 #            encoder_outputs, decoder_hidden)
@@ -54,7 +60,7 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, 
             decoder_input = decoder_input.cuda() if use_cuda else decoder_input
 
             loss += criterion(decoder_output[0], target_variable[di])
-            if ni == EOS_token:
+            if ni == global_variable.EOS_token:
                 break
 
     loss.backward()
@@ -65,11 +71,13 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, 
     return loss.data[0] / target_length
 
 def trainIters(encoder, decoder, n_iters, print_every=1000, plot_every=100, learning_rate=0.01):
-    
-    encoder_optimizer   = optim.SGD(encoder.parameters(), lr = learning_rate)
-    decoder_optimizer   = optim.SGD(decoder.parameters(), lr = learning_rate)
-    # TODO function: variablesFromPair
-    training_pairs      = [variablesFromPair(random.choice(pairs)) for i in range(n_iters)]
+    print_loss_total = 0
+
+    encoder_optimizer   = optim.Adam(encoder.parameters(), lr = learning_rate)
+    decoder_optimizer   = optim.Adam(decoder.parameters(), lr = learning_rate)
+
+    training_pairs      = [variableFromPair(randomChoosePairFromSet(global_variable.train_set, 'fc1'))
+                           for i in range(n_iters)]
     criterion           = nn.NLLLoss()
 
     for iter in range(1, n_iters + 1):

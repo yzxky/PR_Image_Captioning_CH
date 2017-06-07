@@ -8,6 +8,6 @@ import nltk
 ##### output ########
 # BLEUscore: BLEU-n score
 
-def bleu_score(reference,predict,n):
+def bleu_score(reference,predict,n = 1):
     BLEUscore = nltk.translate.bleu_score.modified_precision(reference,predict,n)
     return float(BLEUscore)
