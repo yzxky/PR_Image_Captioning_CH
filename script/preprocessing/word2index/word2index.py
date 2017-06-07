@@ -64,7 +64,7 @@ def txt2list(file_name, max_length = 0):
                 if line.isdigit():
                     idx = int(line)
                     continue
-                lst = [1]
+                lst = []
                 for word in line.split(' '):
                     lst.append(lang.word2index[word])
                 if max_length > 0:
@@ -73,9 +73,9 @@ def txt2list(file_name, max_length = 0):
                     else:
                         lst.extend([0]*(max_length-len(lst)))
                 idx_lst.append((idx, lst))
-        return idx_lst
+        return lang, idx_lst
     except Exception, e:
         print("The max_length is not an integer")
-        return 0
+        return None, []
 
 # idx_list = txt2list("train_cut_process", 'a')
