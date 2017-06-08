@@ -22,3 +22,8 @@
 
 选修[Embending](http://pytorch.org/tutorials/beginner/nlp/word_embeddings_tutorial.html)
 
+## 用到的git命令
++ 删除文件预览  git rm -r -n --cached  ./script/saved_model
++ 删除文件 git rm -r --cached  ./script/saved_model
++ 切换branch git branch [branchname]
++ git状态 git status
