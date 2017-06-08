@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import random
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -34,23 +35,23 @@ class Decoder_ShowAndTellModel(nn.Module):
         self.rnn_num_layers     = num_layers
         self.rnn_drop_prob      = drop_prob
 
-        
         self.embedding  = nn.Embedding(self.rnn_output_size, self.rnn_hidden_size)
         self.rnn        = nn.LSTM(self.rnn_hidden_size, self.rnn_hidden_size, self.rnn_num_layers, dropout=self.rnn_drop_prob)
         self.out        = nn.Linear(self.rnn_hidden_size, self.rnn_output_size)
         self.softmax    = nn.LogSoftmax()
 
     def forward(self, input, hidden):
-        output = self.embedding(input).view(1, 1, -1)
+        output = self.embedding(input)
+        output = output.view(1, -1, self.rnn_hidden_size)
         for i in range(self.rnn_num_layers):
             output = F.relu(output)
             output, hidden = self.rnn(output, hidden)
         output = self.softmax(self.out(output[0]))
         return output, hidden
 
-    def initHidden(self):
-        h0 = Variable(torch.zeros(1, 1, self.rnn_hidden_size))
-        c0 = Variable(torch.zeros(1, 1, self.rnn_hidden_size))
+    def initHidden(self, batch_size):
+        h0 = Variable(torch.zeros(1, batch_size, self.rnn_hidden_size))
+        c0 = Variable(torch.zeros(1, batch_size, self.rnn_hidden_size))
 #        result = (Variable(torch.zeros(1, 1, self.rnn_hidden_size)),
 #                  Variable(torch.zeros(1, 1, self.rnn_hidden_size)))
         if use_cuda:
@@ -59,8 +60,11 @@ class Decoder_ShowAndTellModel(nn.Module):
             return (h0, c0)
 
     def initHiddenFromFeats(self, img_feats):
-        hidden = self.initHidden()
+        hidden = self.initHidden(img_feats.size()[0])
         for i in range(self.rnn_num_layers):
-            output = F.relu(img_feats).view(1, 1, -1)
+            output = F.relu(img_feats).view(1, -1, self.rnn_hidden_size)
             output, hidden = self.rnn(output, hidden)
         return hidden
+
+
+teacher_forcing_ratio = 1

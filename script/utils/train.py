@@ -15,13 +15,14 @@ from utils import global_variable
 
 use_cuda = global_variable.use_cuda
 
-teacher_forcing_ratio = 0.8
+teacher_forcing_ratio = 1
 
 def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion):
     encoder_optimizer.zero_grad()
     decoder_optimizer.zero_grad()
 
-    target_length   = target_variable.size()[0]
+    batch_size      = target_variable.size()[0]
+    target_length   = target_variable.size()[1]
 
     encoder_outputs = Variable(torch.zeros(encoder.output_size))
     encoder_outputs = encoder_outputs.cuda() if use_cuda else encoder_outputs
@@ -30,7 +31,8 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, 
 
     encoder_outputs = encoder(input_variable)
 
-    decoder_input   = Variable(torch.LongTensor([[global_variable.SOS_token]]))
+    decoder_input   = Variable(torch.LongTensor(
+        [[global_variable.SOS_token] for _ in range(batch_size)]))
     decoder_input   = decoder_input.cuda() if use_cuda else decoder_input
 
     decoder_hidden  = decoder.initHiddenFromFeats(encoder_outputs)
@@ -45,8 +47,12 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, 
         for di in range(target_length):
             decoder_output, decoder_hidden = decoder(
                     decoder_input, decoder_hidden)
-            loss += criterion(decoder_output[0], target_variable[di])
-            decoder_input = target_variable[di]
+
+            test_a = decoder_output[:, 0]
+            test_b = target_variable[:, di]
+
+            loss += criterion(decoder_output, target_variable[:, di])
+            decoder_input = target_variable[:, di]
 
     else:
         # Without teacher forcing: use its own predictions as the next input
@@ -54,7 +60,7 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, 
             decoder_output, decoder_hidden = decoder(
                     decoder_input, decoder_hidden)
             topv, topi = decoder_output.data.topk(1)
-            ni = topi[0][0]
+            ni = topi[0]
 
             decoder_input = Variable(torch.LongTensor([[ni]]))
             decoder_input = decoder_input.cuda() if use_cuda else decoder_input

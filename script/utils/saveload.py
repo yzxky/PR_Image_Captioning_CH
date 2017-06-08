@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from model.ShowAndTellModel import *
+from model.ShowAndTellRevise import *
 
 def save(encoder,decoder,path):
     torch.save(model,path)
@@ -15,7 +17,8 @@ def load(path):
 def load_para(path,modeltype):
     if modeltype == 'encoder':
         the_model = Encoder_ShowAndTellModel(*args, **kwargs)
-    else# if modeltype == 'decoder':
+    else:# if modeltype == 'decoder':
         the_model = Decoder_ShowAndTellModel(*args, **kwargs)
     the_model.load_state_dict(torch.load(path))
+    return the_model
 

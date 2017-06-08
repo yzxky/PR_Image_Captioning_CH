@@ -96,3 +96,5 @@ ENV/
 *.pyc
 *.txt
 *.pkl
+*.swp
+*.bak
